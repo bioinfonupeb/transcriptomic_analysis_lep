@@ -3,19 +3,6 @@
 ROOT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export ROOT_PATH
 
-## Setup the environment and load the variables
-#SETUP_FILE="${ROOT_PATH}/src/setup.sh"
-#
-## Check if the config.sh file exists
-#if [ -f "${SETUP_FILE}" ]; then
-#    # Execute the config.sh script to set environment
-#    echo "Loading configuration from ${SETUP_FILE}"
-#    source "${SETUP_FILE}"
-#else
-#    echo "Error: ./src/setup.sh not found at: ${SETUP_FILE}"
-#    exit 1
-#fi
-
 INPUT_FOLDER="${ROOT_PATH}/data/raw"
 
 # For each directory in the data directory, execute the process_data.sh script

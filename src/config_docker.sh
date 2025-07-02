@@ -24,7 +24,7 @@ ${PATHS["SRC"]}:/src -w /data"
 # Define a function to convert absolute paths to relative paths to use in Docker volumes and retunrs the relative path
 # Usage example:
 # relative_path=$(convert_to_relative_path "/absolute/path/to/dir" "/root/path")
-convert_to_relative_path(abs_path, root_path) {
+convert_to_relative_path() {
   local abs_path="$1"
   local root_path="$2"
 
@@ -77,6 +77,6 @@ run_docker_command() {
   echo "=========================================================================="
 
   # Run the Docker command with the prefix
-  eval "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command"
+#  eval "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command"
 }
 export -f run_docker_command

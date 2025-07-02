@@ -24,16 +24,18 @@ if [ -f "${SETUP_FILE}" ]; then
 
     # Execute the ./src/setup.sh script
     SETUP_CMD="setup_analysis_structure ${SAMPLE_NAME} ${FORWARD_FASTQ} ${REVERSE_FASTQ}"
-    echo "Executing setup command: ${SETUP_CMD}"
+#    echo "Executing setup command: ${SETUP_CMD}"
     eval "${SETUP_CMD}" || { echo "Failed to execute setup script"; exit 1; }
 else
     echo "Error: ./src/setup.sh not found at: ${SETUP_FILE}"
     exit 1
 fi
 
+# Load config_docker.sh file for Docker paths and variables
+source ./src/setup_docker.sh
 
-source ./src/config_docker.sh
-
+#echo "DOCKER_VAR[\"DOCKER_RUN_PREFIX\"]"
+#echo "${DOCKER_VAR["DOCKER_RUN_PREFIX"]}"
 
 
 ## Define the log file
@@ -44,14 +46,48 @@ source ./src/config_docker.sh
 # Print the start time
 echo "Starting pipeline for sample: ${SAMPLE_NAME} at $(date)"
 
-# Step 1: Quality Control using FastQC
-MAPPED_FORWARD_FASTQ=$(echo "$FORWARD_FASTQ" | sed "s|$FASTQ_DIR|/input|")
-MAPPED_REVERSE_FASTQ=$(echo "$REVERSE_FASTQ" | sed "s|$FASTQ_DIR|/input|")
-MAPPED_OUTPUT_DIR=$(echo "$FASTQC_RAW_ANALYSIS_PATH" | sed "s|$ROOT_PATH|/data|")
-echo "========================================================"
-echo $OUTPUT_DIR
-echo $FASTQC_RAW_ANALYSIS_PATH
-echo $MAPPED_OUTPUT_DIR
-echo "========================================================"
 
-bash "${SRC_PATH}/fastq_quality.sh" "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_OUTPUT_DIR}"
+FASTQ_DIR=${PATHS["SAMPLE_DIR"]}
+
+R1=${PATHS["RAW_R1"]}
+R2=${PATHS["RAW_R2"]}
+QC_FASTQC_RAW=${PATHS["QC_FASTQC_RAW"]}
+
+# Check if the output directory exists, if not create it
+if [ ! -d "$QC_FASTQC_RAW" ]; then
+  echo "Output directory does not exist. Creating $QC_FASTQC_RAW..."
+  mkdir -p "$QC_FASTQC_RAW"
+fi
+
+# =========================================================
+# Step 1: Quality Control using FastQC and Trimmomatic
+# =========================================================
+
+MAPPED_FORWARD_FASTQ=$(echo "$R1" | sed "s|${PATHS["BASE_DIR_INPUT"]}|/raw|")
+MAPPED_REVERSE_FASTQ=$(echo "$R2" | sed "s|${PATHS["BASE_DIR_INPUT"]}|/raw|")
+MAPPED_RAW_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_RAW" | sed "s|$FASTQ_DIR|/data|")
+
+# >>> Run FastQC on the raw FASTQ files
+source ${PATHS["SRC"]}/fastq_quality.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_RAW_FASTQC_OUTPUT_DIR}"
+
+# >>> Run Trimmomatic for quality trimming
+MAPPED_TRIMMED_OUTPUT_DIR=$(echo "${PATHS["TRIMMED"]}" | sed "s|$FASTQ_DIR|/data|")
+
+source ${PATHS["SRC"]}/trimming.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_OUTPUT_DIR}"
+
+# >>> Run FastQC on the trimmed FASTQ files
+QC_FASTQC_TRIMMED=${PATHS["QC_FASTQC_TRIMMED"]}
+if [ ! -d "$QC_FASTQC_TRIMMED" ]; then
+  echo "Output directory does not exist. Creating $QC_FASTQC_TRIMMED..."
+  mkdir -p "$QC_FASTQC_TRIMMED"
+fi
+MAPPED_TRIMMED_FORWARD_FASTQ=$(echo "${MAPPED_TRIMMED_OUTPUT_DIR}/trimmed_forward.fastq.gz")
+MAPPED_TRIMMED_REVERSE_FASTQ=$(echo "${MAPPED_TRIMMED_OUTPUT_DIR}/trimmed_reverse.fastq.gz")
+MAPPED_TRIMMED_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_TRIMMED" | sed "s|$FASTQ_DIR|/data|")
+
+source ${PATHS["SRC"]}/fastq_quality.sh \
+ "${MAPPED_TRIMMED_FORWARD_FASTQ}" \
+ "${MAPPED_TRIMMED_REVERSE_FASTQ}" \
+ "${MAPPED_TRIMMED_FASTQC_OUTPUT_DIR}"
+
+  

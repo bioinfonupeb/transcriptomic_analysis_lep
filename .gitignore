@@ -162,8 +162,10 @@ cython_debug/
 #.idea/
 
 .gz
+.fastq
 
 output/
 data/
 bkp/
 tmp/
+processed/

@@ -25,6 +25,7 @@ setup_analysis_structure() {
     fi
 
     # Create directory structure
+    local base_raw_dir="$(dirname "$(readlink -f "$forward_fastq")")"
     local sample_dir="${root_dir}/processed/${sample_name}"
     local raw_data_dir="${sample_dir}/raw_data"
     local trimmed_dir="${sample_dir}/trimmed"
@@ -46,8 +47,13 @@ setup_analysis_structure() {
 
     # Define path variables
     declare -gA PATHS  # Global associative array to store all paths
+    export PATHS
 
     # === Base directories for the sample ===
+    PATHS["BASE_DIR_INPUT"]="$base_raw_dir"
+    PATHS["RAW_R1"]="$forward_fastq"
+    PATHS["RAW_R2"]="$reverse_fastq"
+
     PATHS["SAMPLE_DIR"]="$sample_dir"
     PATHS["RAW_DATA"]="$raw_data_dir"
     PATHS["TRIMMED"]="$trimmed_dir"
@@ -62,11 +68,12 @@ setup_analysis_structure() {
     # === File paths for the sample ===
 
     # Raw input paths
-    PATHS["RAW_R1"]="${raw_data_dir}/${sample_name}_R1.fastq.gz"
-    PATHS["RAW_R2"]="${raw_data_dir}/${sample_name}_R2.fastq.gz"
+    PATHS["R1"]="${raw_data_dir}/${sample_name}_R1.fastq.gz"
+    PATHS["R2"]="${raw_data_dir}/${sample_name}_R2.fastq.gz"
 
     # Log file path
     PATHS["LOG_MAIN"]="${logs_dir}/${sample_name}.log"
+    PATHS["LOG_CMD"]="${logs_dir}/${sample_name}.cmd.log"
 
     PATHS["TRIMMED_R1"]="${trimmed_dir}/${sample_name}_trimmed_R1.fastq.gz"
     PATHS["TRIMMED_R2"]="${trimmed_dir}/${sample_name}_trimmed_R2.fastq.gz"
