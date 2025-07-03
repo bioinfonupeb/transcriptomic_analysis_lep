@@ -12,20 +12,6 @@ FORWARD_FASTQ=$1
 REVERSE_FASTQ=$2
 OUTPUT_DIR=$3
 
-# Check if the input files exist
-if [ ! -f "$FORWARD_FASTQ" ]; then
-  echo "Error: Forward FASTQ file '$FORWARD_FASTQ' does not exist."
-  exit 1
-fi
-if [ ! -f "$REVERSE_FASTQ" ]; then
-  echo "Error: Reverse FASTQ file '$REVERSE_FASTQ' does not exist."
-  exit 1
-fi
-
-echo "Creating output directory: $OUTPUT_DIR"
-# Create output directory if it does not exist
-mkdir -p "$OUTPUT_DIR"
-
 PATHS["TRIMMED_R1"]="${OUTPUT_DIR}/trimmed_forward.fastq.gz"
 PATHS["TRIMMED_R2"]="${OUTPUT_DIR}/trimmed_reverse.fastq.gz"
 
@@ -50,6 +36,3 @@ DOCKER_RUN_CMD="trimmomatic PE -threads 10 -phred33 \
 # Run the Docker command
 echo "$DOCKER_RUN_PREFIX" "$DOCKER_IMAGE" "$DOCKER_RUN_CMD"
 run_docker_command "$DOCKER_IMAGE" "$DOCKER_RUN_CMD"
-
-#  ${OUTPUT_DIR}/trimmed_forward.fastq.gz ${OUTPUT_DIR}/unpaired_forward.fastq.gz \
-#  ${OUTPUT_DIR}/trimmed_reverse.fastq.gz ${OUTPUT_DIR}/unpaired_reverse.fastq.gz \

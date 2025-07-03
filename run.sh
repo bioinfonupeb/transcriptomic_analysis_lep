@@ -68,12 +68,18 @@ MAPPED_REVERSE_FASTQ=$(echo "$R2" | sed "s|${PATHS["BASE_DIR_INPUT"]}|/raw|")
 MAPPED_RAW_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_RAW" | sed "s|$FASTQ_DIR|/data|")
 
 # >>> Run FastQC on the raw FASTQ files
-source ${PATHS["SRC"]}/fastq_quality.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_RAW_FASTQC_OUTPUT_DIR}"
+#source ${PATHS["SRC"]}/fastq_quality.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_RAW_FASTQC_OUTPUT_DIR}"
 
 # >>> Run Trimmomatic for quality trimming
-MAPPED_TRIMMED_OUTPUT_DIR=$(echo "${PATHS["TRIMMED"]}" | sed "s|$FASTQ_DIR|/data|")
+TRIMMED_DIR=${PATHS["TRIMMED"]}
+if [ ! -d "$TRIMMED_DIR" ]; then
+  echo "Output directory does not exist. Creating $TRIMMED_DIR..."
+  mkdir -p "$TRIMMED_DIR"
+fi
 
-source ${PATHS["SRC"]}/trimming.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_OUTPUT_DIR}"
+MAPPED_TRIMMED_OUTPUT_DIR=$(echo "$TRIMMED_DIR" | sed "s|$FASTQ_DIR|/data|")
+
+#source ${PATHS["SRC"]}/trimming.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_TRIMMED_OUTPUT_DIR}"
 
 # >>> Run FastQC on the trimmed FASTQ files
 QC_FASTQC_TRIMMED=${PATHS["QC_FASTQC_TRIMMED"]}
@@ -85,9 +91,26 @@ MAPPED_TRIMMED_FORWARD_FASTQ=$(echo "${MAPPED_TRIMMED_OUTPUT_DIR}/trimmed_forwar
 MAPPED_TRIMMED_REVERSE_FASTQ=$(echo "${MAPPED_TRIMMED_OUTPUT_DIR}/trimmed_reverse.fastq.gz")
 MAPPED_TRIMMED_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_TRIMMED" | sed "s|$FASTQ_DIR|/data|")
 
-source ${PATHS["SRC"]}/fastq_quality.sh \
+#source ${PATHS["SRC"]}/fastq_quality.sh \
+# "${MAPPED_TRIMMED_FORWARD_FASTQ}" \
+# "${MAPPED_TRIMMED_REVERSE_FASTQ}" \
+# "${MAPPED_TRIMMED_FASTQC_OUTPUT_DIR}"
+
+
+ # =========================================================
+# Step 2: De Novo Transcriptome Assembly
+# =========================================================
+
+# >>> Run Trinity for de novo transcriptome assembly
+ASSEMBLY_DIR=${PATHS["ASSEMBLY"]}
+if [ ! -d "$ASSEMBLY_DIR" ]; then
+  echo "Output directory does not exist. Creating $ASSEMBLY_DIR..."
+  mkdir -p "$ASSEMBLY_DIR"
+fi
+
+MAPPED_ASSEMBLY_OUTPUT_DIR=$(echo "$ASSEMBLY_DIR" | sed "s|$FASTQ_DIR|/data|")
+source ${PATHS["SRC"]}/assembly.sh \
  "${MAPPED_TRIMMED_FORWARD_FASTQ}" \
  "${MAPPED_TRIMMED_REVERSE_FASTQ}" \
- "${MAPPED_TRIMMED_FASTQC_OUTPUT_DIR}"
-
-  
+ "${MAPPED_ASSEMBLY_OUTPUT_DIR}"
+ 

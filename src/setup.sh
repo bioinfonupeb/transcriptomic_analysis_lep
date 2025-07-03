@@ -29,6 +29,7 @@ setup_analysis_structure() {
     local sample_dir="${root_dir}/processed/${sample_name}"
     local raw_data_dir="${sample_dir}/raw_data"
     local trimmed_dir="${sample_dir}/trimmed"
+    local assembly_dir="${sample_dir}/trinity_assembly"
     local alignment_dir="${sample_dir}/alignment"
     local quantification_dir="${sample_dir}/quantification"
     local qc_dir="${sample_dir}/qc"
@@ -38,7 +39,8 @@ setup_analysis_structure() {
 
     # Create directories
     mkdir -p "$sample_dir" "$raw_data_dir" "$trimmed_dir" "$alignment_dir" \
-             "$quantification_dir" "$qc_dir" "$logs_dir" "$tmp_dir"
+             "$assembly_dir" "$quantification_dir" "$qc_dir" "$logs_dir"   \
+             "$tmp_dir"
 
     # Set up file path variables
     # Raw data (symlink original files)
@@ -58,6 +60,7 @@ setup_analysis_structure() {
     PATHS["RAW_DATA"]="$raw_data_dir"
     PATHS["TRIMMED"]="$trimmed_dir"
     PATHS["ALIGNMENT"]="$alignment_dir"
+    PATHS["ASSEMBLY"]="$assembly_dir"
     PATHS["QUANTIFICATION"]="$quantification_dir"
     PATHS["QC"]="$qc_dir"
     PATHS["LOGS"]="$logs_dir"
