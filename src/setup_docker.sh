@@ -17,7 +17,13 @@ fi
 declare -gA DOCKER_VAR  # Global associative array to store all paths
 
 # Define the Docker run prefix command for workflow tools
-DOCKER_VAR["DOCKER_RUN_PREFIX"]="docker run --rm -v ${PATHS["SAMPLE_DIR"]}:/data -v ${PATHS["BASE_DIR_INPUT"]}:/raw -v ${PATHS["SRC"]}:/src -w /data"
+DOCKER_VAR["DOCKER_RUN_PREFIX"]="docker run --rm \
+-v ${PATHS["SAMPLE_DIR"]}:/data \
+-v ${PATHS["BASE_DIR_INPUT"]}:/raw \
+-v ${PATHS["SRC"]}:/src \
+-u $(id -u) \
+-w /data"
+
 
 
 
@@ -60,9 +66,20 @@ convert_to_absolute_path() {
 # Usage example:
 # run_docker_command "my_docker_image" "my_command"
 run_docker_command() {
-  local image="$1"
-  shift
-  local command="$@"
+
+  # Verfiy if has exactly 2 arguments
+  if [[ $# -lt 2 ]]; then
+    local image="$1"
+    local command="$2"
+  elif [[ $# -eq 3 ]]; then
+    local image="$1"
+    local command="$2"
+    local log_tag="$3"
+  else
+    echo "Usage: run_docker_command <image> <command> [log_tag]"
+    return 1
+  fi
+
 
   # Check if the image is provided
   if [[ -z "$image" ]]; then
@@ -79,7 +96,16 @@ run_docker_command() {
 
   # Log command to PATHS["LOG_CMD"]
   if [[ -n "${PATHS["LOG_CMD"]}" ]]; then
-    echo "> RUN $(date): ${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command" >> "${PATHS["LOG_CMD"]}"
+    echo "==========================================================================" >> "${PATHS["LOG_CMD"]}"
+    if [[ -z "$log_tag" ]]; then
+      echo "> RUN at $(date)" >> "${PATHS["LOG_CMD"]}"
+    else
+      echo "> RUN \"$log_tag\" at $(date)" >> "${PATHS["LOG_CMD"]}"
+    fi
+    echo "" >> "${PATHS["LOG_CMD"]}"
+    echo "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command" >> "${PATHS["LOG_CMD"]}"
+    echo "" >> "${PATHS["LOG_CMD"]}"
+    echo "==========================================================================" >> "${PATHS["LOG_CMD"]}"
   fi
 
   # Run the Docker command with the prefix

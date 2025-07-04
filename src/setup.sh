@@ -29,18 +29,21 @@ setup_analysis_structure() {
     local sample_dir="${root_dir}/processed/${sample_name}"
     local raw_data_dir="${sample_dir}/raw_data"
     local trimmed_dir="${sample_dir}/trimmed"
-    local assembly_dir="${sample_dir}/trinity_assembly"
+    local assembly_dir="${sample_dir}/assembly"
+    local trinity_assembly_dir="${assembly_dir}/trinity_assembly"
     local alignment_dir="${sample_dir}/alignment"
     local quantification_dir="${sample_dir}/quantification"
+
     local qc_dir="${sample_dir}/qc"
+
     local logs_dir="${sample_dir}/logs"
     local tmp_dir="${sample_dir}/tmp"
     local src="${root_dir}/src"
 
     # Create directories
     mkdir -p "$sample_dir" "$raw_data_dir" "$trimmed_dir" "$alignment_dir" \
-             "$assembly_dir" "$quantification_dir" "$qc_dir" "$logs_dir"   \
-             "$tmp_dir"
+             "$trinity_assembly_dir" "$assembly_dir" "$quantification_dir" \
+             "$qc_dir" "$logs_dir" "$tmp_dir"
 
     # Set up file path variables
     # Raw data (symlink original files)
@@ -60,9 +63,20 @@ setup_analysis_structure() {
     PATHS["RAW_DATA"]="$raw_data_dir"
     PATHS["TRIMMED"]="$trimmed_dir"
     PATHS["ALIGNMENT"]="$alignment_dir"
-    PATHS["ASSEMBLY"]="$assembly_dir"
+
+    PATHS["ASSEMBLY_DIR"]="$assembly_dir"
+    PATHS["TRINITY_ASSEMBLY_DIR"]="$trinity_assembly_dir"
+    PATHS["TRINITY_ASSEMBLY_FASTA"]="$assembly_dir/trinity_assembly.Trinity.fasta"
+    PATHS["ASSEMBLY_QC_TRINITY_STATS"]="$qc_dir/trinity_assembly_stats.txt"
+
+    PATHS["ASSEMBLY_QC_BUSCO"]="$assembly_dir/qc_busco"
+    PATHS["ASSEMBLY_QC_BUSCO_PLOT"]="$assembly_dir/qc_busco_plot"
+
+
     PATHS["QUANTIFICATION"]="$quantification_dir"
+
     PATHS["QC"]="$qc_dir"
+
     PATHS["LOGS"]="$logs_dir"
     PATHS["TMP"]="$tmp_dir"
     PATHS["SRC"]="$src"
@@ -81,23 +95,21 @@ setup_analysis_structure() {
     PATHS["TRIMMED_R1"]="${trimmed_dir}/${sample_name}_trimmed_R1.fastq.gz"
     PATHS["TRIMMED_R2"]="${trimmed_dir}/${sample_name}_trimmed_R2.fastq.gz"
 
-    # QC - FASTQC control paths
+    # QC READS - TrinityStats
+    PATHS["QC_TRINITY_STATS"]="${qc_dir}/trinity_stats"
+
+    # QC READS - FASTQC
     PATHS["QC_FASTQC_RAW"]="${qc_dir}/fastqc_raw"
     PATHS["QC_FASTQC_TRIMMED"]="${qc_dir}/fastqc_trimmed"
 
-    # ASSEMBLY - Salmon specific paths
-    PATHS["SALMON_INDEX"]="${quantification_dir}/salmon_index"
-    PATHS["SALMON_QUANT"]="${quantification_dir}/salmon_quant"
+    # QC ASSEMBLY - Salmon
+    PATHS["QC_SALMON"]="${qc_dir}/salmon"
+    PATHS["QC_SALMON_INDEX"]="${PATHS["QC_SALMON"]}/salmon_index"
+    PATHS["QC_SALMON_QUANT"]="${PATHS["QC_SALMON"]}/salmon_quant"
 
-    # Alignment paths
-    PATHS["ALIGNMENT_BAM"]="${alignment_dir}/${sample_name}.aligned.bam"
-    PATHS["ALIGNMENT_SORTED_BAM"]="${alignment_dir}/${sample_name}.aligned.sorted.bam"
-    PATHS["ALIGNMENT_BAM_INDEX"]="${alignment_dir}/${sample_name}.aligned.sorted.bam.bai"
-    PATHS["ALIGNMENT_BAM_LOG"]="${logs_dir}/${sample_name}.alignment.log"
-    PATHS["ALIGNMENT_BAM_STATS"]="${alignment_dir}/${sample_name}.alignment.stats"
+    # QC ASSEMBLY - RSEM with Bowtie2
+    PATHS["QC_RSEM_BOWTIE2"]="${qc_dir}/rsem_bowtie2"
 
-    # Quantification paths
-    PATHS["QUANTIFICATION_TSV"]="${quantification_dir}/${sample_name}.quant.tsv"
 
 
     echo "Created analysis structure for sample: $sample_name"

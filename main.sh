@@ -46,3 +46,5 @@ for dir in "${INPUT_FOLDER}"/*/; do
     fi
 done
 
+echo "=== All samples processed ==="
+

@@ -18,7 +18,7 @@ CONTAINER_NAME="fastqc_container"
 
 # Construct the run command for FASTQC in Docker
 FASTQC_CMD="fastqc -o ${OUTPUT_DIR} ${FORWARD_FASTQ} ${REVERSE_FASTQ}"
-run_docker_command "${DOCKER_IMAGE}" "${FASTQC_CMD}"
+run_docker_command "${DOCKER_IMAGE}" "${FASTQC_CMD}" "Reads QC - FASTQC"
 
 
 # Check if FASTQC ran successfully

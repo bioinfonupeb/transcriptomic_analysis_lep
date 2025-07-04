@@ -34,21 +34,11 @@ fi
 # Load config_docker.sh file for Docker paths and variables
 source ./src/setup_docker.sh
 
-#echo "DOCKER_VAR[\"DOCKER_RUN_PREFIX\"]"
-#echo "${DOCKER_VAR["DOCKER_RUN_PREFIX"]}"
-
-
-## Define the log file
-#LOG_FILE="${OUTPUT_DIR}/pipeline.log"
-## Redirect stdout and stderr to the log file
-#exec > >(tee -i "${LOG_FILE}") 2>&1
-
 # Print the start time
 echo "Starting pipeline for sample: ${SAMPLE_NAME} at $(date)"
 
-
-FASTQ_DIR=${PATHS["SAMPLE_DIR"]}
-
+# Setup the paths from the PATHS associative array
+SAMPLE_DIR=${PATHS["SAMPLE_DIR"]}
 R1=${PATHS["RAW_R1"]}
 R2=${PATHS["RAW_R2"]}
 QC_FASTQC_RAW=${PATHS["QC_FASTQC_RAW"]}
@@ -59,29 +49,35 @@ if [ ! -d "$QC_FASTQC_RAW" ]; then
   mkdir -p "$QC_FASTQC_RAW"
 fi
 
-# =========================================================
+# ==========================================================
 # Step 1: Quality Control using FastQC and Trimmomatic
-# =========================================================
+# ==========================================================
 
+# Setup the paths for the raw FASTQ files and output directory
 MAPPED_FORWARD_FASTQ=$(echo "$R1" | sed "s|${PATHS["BASE_DIR_INPUT"]}|/raw|")
 MAPPED_REVERSE_FASTQ=$(echo "$R2" | sed "s|${PATHS["BASE_DIR_INPUT"]}|/raw|")
-MAPPED_RAW_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_RAW" | sed "s|$FASTQ_DIR|/data|")
+MAPPED_RAW_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_RAW" | sed "s|$SAMPLE_DIR|/data|")
 
-# >>> Run FastQC on the raw FASTQ files
+# >>> RUN: FastQC on the raw FASTQ files
 #source ${PATHS["SRC"]}/fastq_quality.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_RAW_FASTQC_OUTPUT_DIR}"
 
-# >>> Run Trimmomatic for quality trimming
+# ==========================================================
+
+# Setup the paths for the trimmed FASTQ files and output directory
 TRIMMED_DIR=${PATHS["TRIMMED"]}
 if [ ! -d "$TRIMMED_DIR" ]; then
   echo "Output directory does not exist. Creating $TRIMMED_DIR..."
   mkdir -p "$TRIMMED_DIR"
 fi
 
-MAPPED_TRIMMED_OUTPUT_DIR=$(echo "$TRIMMED_DIR" | sed "s|$FASTQ_DIR|/data|")
+MAPPED_TRIMMED_OUTPUT_DIR=$(echo "$TRIMMED_DIR" | sed "s|$SAMPLE_DIR|/data|")
 
+# >>> RUN: Trimmomatic to trim the FASTQ files
 #source ${PATHS["SRC"]}/trimming.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_TRIMMED_OUTPUT_DIR}"
 
-# >>> Run FastQC on the trimmed FASTQ files
+# ==========================================================
+
+# Setup the paths for the trimmed FASTQ files and FastQC output directory
 QC_FASTQC_TRIMMED=${PATHS["QC_FASTQC_TRIMMED"]}
 if [ ! -d "$QC_FASTQC_TRIMMED" ]; then
   echo "Output directory does not exist. Creating $QC_FASTQC_TRIMMED..."
@@ -89,28 +85,63 @@ if [ ! -d "$QC_FASTQC_TRIMMED" ]; then
 fi
 MAPPED_TRIMMED_FORWARD_FASTQ=$(echo "${MAPPED_TRIMMED_OUTPUT_DIR}/trimmed_forward.fastq.gz")
 MAPPED_TRIMMED_REVERSE_FASTQ=$(echo "${MAPPED_TRIMMED_OUTPUT_DIR}/trimmed_reverse.fastq.gz")
-MAPPED_TRIMMED_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_TRIMMED" | sed "s|$FASTQ_DIR|/data|")
+MAPPED_TRIMMED_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_TRIMMED" | sed "s|$SAMPLE_DIR|/data|")
 
+# >>> RUN: FastQC on the trimmed FASTQ files
 #source ${PATHS["SRC"]}/fastq_quality.sh \
 # "${MAPPED_TRIMMED_FORWARD_FASTQ}" \
 # "${MAPPED_TRIMMED_REVERSE_FASTQ}" \
 # "${MAPPED_TRIMMED_FASTQC_OUTPUT_DIR}"
 
+# ==========================================================
 
- # =========================================================
+
+# ==========================================================
 # Step 2: De Novo Transcriptome Assembly
-# =========================================================
+# ==========================================================
 
-# >>> Run Trinity for de novo transcriptome assembly
+# Setup the paths for the assembly output directories
 ASSEMBLY_DIR=${PATHS["ASSEMBLY"]}
-if [ ! -d "$ASSEMBLY_DIR" ]; then
-  echo "Output directory does not exist. Creating $ASSEMBLY_DIR..."
-  mkdir -p "$ASSEMBLY_DIR"
-fi
+TRINITY_ASSEMBLY_DIR=${PATHS["TRINITY_ASSEMBLY_DIR"]}
+MAPPED_ASSEMBLY_OUTPUT_DIR=$(echo "$ASSEMBLY_DIR" | sed "s|$SAMPLE_DIR|/data|")
+MAPPED_TRINITY_ASSEMBLY_DIR=$(echo "$TRINITY_ASSEMBLY_DIR" | sed "s|$SAMPLE_DIR|/data|")
 
-MAPPED_ASSEMBLY_OUTPUT_DIR=$(echo "$ASSEMBLY_DIR" | sed "s|$FASTQ_DIR|/data|")
+# >>> RUN: Trinity assembly
 source ${PATHS["SRC"]}/assembly.sh \
  "${MAPPED_TRIMMED_FORWARD_FASTQ}" \
  "${MAPPED_TRIMMED_REVERSE_FASTQ}" \
- "${MAPPED_ASSEMBLY_OUTPUT_DIR}"
+ "${MAPPED_ASSEMBLY_OUTPUT_DIR}"   \
+ "${MAPPED_TRINITY_ASSEMBLY_DIR}"
+
+TRINITY_FASTA=${PATHS["TRINITY_ASSEMBLY_FASTA"]}
+
+# ==========================================================
+
+# ==========================================================
+# Step 3: Assembly Quality Control
+# ==========================================================
+
+# Setup the paths for the BUSCO output directory
+MAPPED_TRINITY_FASTA=$(echo "$TRINITY_FASTA" | sed "s|$SAMPLE_DIR|/data|")
+ASSEMBLY_QC_BUSCO=${PATHS["ASSEMBLY_QC_BUSCO"]}
+if [ ! -d "$ASSEMBLY_QC_BUSCO" ]; then
+  echo "Output directory does not exist. Creating $ASSEMBLY_QC_BUSCO..."
+  mkdir -p "$ASSEMBLY_QC_BUSCO"
+fi
+MAPPED_BUSCO_OUTPUT_DIR=$(echo "$ASSEMBLY_QC_BUSCO" | sed "s|$SAMPLE_DIR|.|")
+
+BUSCO_PLOT=${PATHS["ASSEMBLY_QC_BUSCO_PLOT"]}
+if [ ! -d "$BUSCO_PLOT" ]; then
+  echo "Output directory does not exist. Creating $BUSCO_PLOT..."
+  mkdir -p "$BUSCO_PLOT"
+fi
+MAPPED_BUSCO_PLOT=$(echo "$BUSCO_PLOT" | sed "s|$SAMPLE_DIR|.|")
+
+# >>> RUN: BUSCO for assembly quality control
+#source ${PATHS["SRC"]}/assembly_qc_busco.sh \
+#"${MAPPED_TRINITY_FASTA}" \
+#"${MAPPED_BUSCO_OUTPUT_DIR}" \
+#"${MAPPED_BUSCO_PLOT}"
+ 
+# ==========================================================
  
