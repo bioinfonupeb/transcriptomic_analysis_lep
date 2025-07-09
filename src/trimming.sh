@@ -12,9 +12,6 @@ FORWARD_FASTQ=$1
 REVERSE_FASTQ=$2
 OUTPUT_DIR=$3
 
-PATHS["TRIMMED_R1"]="${OUTPUT_DIR}/trimmed_forward.fastq.gz"
-PATHS["TRIMMED_R2"]="${OUTPUT_DIR}/trimmed_reverse.fastq.gz"
-
 TR1=${PATHS["TRIMMED_R1"]}
 TR2=${PATHS["TRIMMED_R2"]}
 UR1="${OUTPUT_DIR}/unpaired_forward.fastq.gz"

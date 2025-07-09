@@ -95,20 +95,21 @@ run_docker_command() {
 
 
   # Log command to PATHS["LOG_CMD"]
-  if [[ -n "${PATHS["LOG_CMD"]}" ]]; then
-    echo "==========================================================================" >> "${PATHS["LOG_CMD"]}"
+  LOG=${PATHS["LOG_CMD"]}
+  if [[ -n "$LOG" ]]; then
+    echo "==========================================================================" >> "$LOG"
     if [[ -z "$log_tag" ]]; then
-      echo "> RUN at $(date)" >> "${PATHS["LOG_CMD"]}"
+      echo "> RUN at $(date)" >> "$LOG"
     else
-      echo "> RUN \"$log_tag\" at $(date)" >> "${PATHS["LOG_CMD"]}"
+      echo "> RUN \"$log_tag\" at $(date)" >> "$LOG"
     fi
-    echo "" >> "${PATHS["LOG_CMD"]}"
-    echo "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command" >> "${PATHS["LOG_CMD"]}"
-    echo "" >> "${PATHS["LOG_CMD"]}"
-    echo "==========================================================================" >> "${PATHS["LOG_CMD"]}"
+    echo "" >> "$LOG"
+    echo "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command" >> "$LOG"
+    echo "" >> "$LOG"
+    echo "==========================================================================" >> "$LOG"
   fi
 
   # Run the Docker command with the prefix
-  eval "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command"
+#  eval "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command"
 }
 export -f run_docker_command

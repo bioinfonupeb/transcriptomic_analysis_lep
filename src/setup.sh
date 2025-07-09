@@ -36,7 +36,7 @@ setup_analysis_structure() {
 
     local qc_dir="${sample_dir}/qc"
 
-    local logs_dir="${sample_dir}/logs"
+    local logs_dir="logs"
     local tmp_dir="${sample_dir}/tmp"
     local src="${root_dir}/src"
 
@@ -69,8 +69,12 @@ setup_analysis_structure() {
     PATHS["TRINITY_ASSEMBLY_FASTA"]="$assembly_dir/trinity_assembly.Trinity.fasta"
     PATHS["ASSEMBLY_QC_TRINITY_STATS"]="$qc_dir/trinity_assembly_stats.txt"
 
-    PATHS["ASSEMBLY_QC_BUSCO"]="$assembly_dir/qc_busco"
-    PATHS["ASSEMBLY_QC_BUSCO_PLOT"]="$assembly_dir/qc_busco_plot"
+    PATHS["ASSEMBLY_QC_BUSCO"]="$qc_dir/qc_busco"
+    PATHS["ASSEMBLY_QC_BUSCO_PLOT"]="$qc_dir/qc_busco_plot"
+
+    PATHS["ASSEMBLY_QC_TRANSRATE"]="$qc_dir/qc_transrate"
+    PATHS["TRANSRATE_ASSEMBLY"]="${PATHS["ASSEMBLY_QC_TRANSRATE"]}/transrate_assembly"
+    PATHS["TRANSRATE_READS"]="${PATHS["ASSEMBLY_QC_TRANSRATE"]}/transrate_reads"
 
 
     PATHS["QUANTIFICATION"]="$quantification_dir"
@@ -92,8 +96,8 @@ setup_analysis_structure() {
     PATHS["LOG_MAIN"]="${logs_dir}/${sample_name}.log"
     PATHS["LOG_CMD"]="${logs_dir}/${sample_name}.cmd.log"
 
-    PATHS["TRIMMED_R1"]="${trimmed_dir}/${sample_name}_trimmed_R1.fastq.gz"
-    PATHS["TRIMMED_R2"]="${trimmed_dir}/${sample_name}_trimmed_R2.fastq.gz"
+    PATHS["TRIMMED_R1"]="${trimmed_dir}/trimmed_forward.fastq.gz"
+    PATHS["TRIMMED_R2"]="${trimmed_dir}/trimmed_reverse.fastq.gz"
 
     # QC READS - TrinityStats
     PATHS["QC_TRINITY_STATS"]="${qc_dir}/trinity_stats"
@@ -109,6 +113,13 @@ setup_analysis_structure() {
 
     # QC ASSEMBLY - RSEM with Bowtie2
     PATHS["QC_RSEM_BOWTIE2"]="${qc_dir}/rsem_bowtie2"
+
+    # Define Params variables
+    declare -gA PARAMS  # Global associative array to store all paths
+    export PARAMS
+
+    # Threads equal to number of CPU cores available minus 1
+    PARAMS["THREADS"]=$(($(nproc) - 1))
 
 
 
