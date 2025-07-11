@@ -7,6 +7,8 @@
 
 echo "Performing assembly quality analysis with TransRate..."
 
+EXEC=${1:-1} # Default to 1 if not provided (meaning execute)
+
 # Directory for RSEM and Bowtie2 QC
 SAMPLE_DIR=${PATHS["SAMPLE_DIR"]}
 TRANSRATE_ASSEMBLY=${PATHS["TRANSRATE_ASSEMBLY"]}
@@ -41,9 +43,17 @@ MAP_R2=$(echo "$R2_FILE" | sed "s|$SAMPLE_DIR|/data|")
 # https://hibberdlab.com/transrate/metrics.html#contig-metrics
 CMD="transrate --assembly $MAP_ASSEMBLY --output $MAP_QC_DIR_A --threads 12"
 
-run_docker_command "$DOCKER_IMAGE" "$CMD" "TransRate: contig metrics for assembly quality analysis."
+if [ "$EXEC" -eq 0 ]; then
+    echo "SKIPPING command for Assembly QC with Transrate - Contig Metrics"
+else
+    run_docker_command "$DOCKER_IMAGE" "$CMD" "TransRate: contig metrics for assembly quality analysis."
+fi
 
 # Analize the assembly file using read evidence
 # https://hibberdlab.com/transrate/metrics.html#read-mapping-metrics
 CMD="transrate --assembly $MAP_ASSEMBLY --left $MAP_R1 --right $MAP_R2 --output $MAP_QC_DIR_R --threads 12"
-run_docker_command "$DOCKER_IMAGE" "$CMD" "TransRate: read evidence for assembly quality analysis."
+if [ "$EXEC" -eq 0 ]; then
+    echo "SKIPPING command for Assembly QC with Transrate - Read Evidence"
+else
+    run_docker_command "$DOCKER_IMAGE" "$CMD" "TransRate: read evidence for assembly quality analysis."
+fi

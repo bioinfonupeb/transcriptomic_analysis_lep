@@ -11,7 +11,7 @@ for dir in "${INPUT_FOLDER}"/*/; do
 
         # Get the name of sample from the directory name
         SAMPLE_NAME=$(basename "${dir}")
-        echo "Processing sample: ${SAMPLE_NAME}"
+        echo -e "\n\nProcessing sample: ${SAMPLE_NAME}"
 
 
         # Create a list variable to store fastq files
@@ -36,7 +36,7 @@ for dir in "${INPUT_FOLDER}"/*/; do
             RUN_CMD="./run.sh ${SAMPLE_NAME} ${FORWARD_FASTQ} ${REVERSE_FASTQ}"
             eval "${RUN_CMD}"
 
-            exit 1
+#            exit 1
         else
             echo "Error: Not enough fastq files found in ${dir}. Expected 2 (forward and reverse)."
         fi

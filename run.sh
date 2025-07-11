@@ -19,7 +19,7 @@ SETUP_FILE="${ROOT_PATH}/src/setup.sh"
 
 # Check if the config.sh file exists
 if [ -f "${SETUP_FILE}" ]; then
-    echo "Loading configuration from ${SETUP_FILE}"
+    echo "Loading configuration from ${SETUP_FILE} for sample: ${SAMPLE_NAME}"
     source "${SETUP_FILE}"
 
     # Execute the ./src/setup.sh script
@@ -33,6 +33,8 @@ fi
 
 # Load config_docker.sh file for Docker paths and variables
 source ./src/setup_docker.sh
+
+source ${PATHS["SRC"]}/steps.sh
 
 # Print the start time
 echo "Starting pipeline for sample: ${SAMPLE_NAME} at $(date)"
@@ -59,7 +61,11 @@ MAPPED_REVERSE_FASTQ=$(echo "$R2" | sed "s|${PATHS["BASE_DIR_INPUT"]}|/raw|")
 MAPPED_RAW_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_RAW" | sed "s|$SAMPLE_DIR|/data|")
 
 # >>> RUN: FastQC on the raw FASTQ files
-source ${PATHS["SRC"]}/fastq_quality.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_RAW_FASTQC_OUTPUT_DIR}"
+source ${PATHS["SRC"]}/fastq_quality.sh \
+"${MAPPED_FORWARD_FASTQ}" \
+"${MAPPED_REVERSE_FASTQ}" \
+"${MAPPED_RAW_FASTQC_OUTPUT_DIR}" \
+${STEPS["raw_qc"]}
 
 # ==========================================================
 
@@ -73,7 +79,11 @@ fi
 MAPPED_TRIMMED_OUTPUT_DIR=$(echo "$TRIMMED_DIR" | sed "s|$SAMPLE_DIR|/data|")
 
 # >>> RUN: Trimmomatic to trim the FASTQ files
-source ${PATHS["SRC"]}/trimming.sh "${MAPPED_FORWARD_FASTQ}" "${MAPPED_REVERSE_FASTQ}" "${MAPPED_TRIMMED_OUTPUT_DIR}"
+source ${PATHS["SRC"]}/trimming.sh \
+"${MAPPED_FORWARD_FASTQ}" \
+"${MAPPED_REVERSE_FASTQ}" \
+"${MAPPED_TRIMMED_OUTPUT_DIR}" \
+${STEPS["trim"]}
 
 # ==========================================================
 
@@ -89,9 +99,10 @@ MAPPED_TRIMMED_FASTQC_OUTPUT_DIR=$(echo "$QC_FASTQC_TRIMMED" | sed "s|$SAMPLE_DI
 
 # >>> RUN: FastQC on the trimmed FASTQ files
 source ${PATHS["SRC"]}/fastq_quality.sh \
-# "${MAPPED_TRIMMED_FORWARD_FASTQ}" \
-# "${MAPPED_TRIMMED_REVERSE_FASTQ}" \
-# "${MAPPED_TRIMMED_FASTQC_OUTPUT_DIR}"
+"${MAPPED_TRIMMED_FORWARD_FASTQ}" \
+"${MAPPED_TRIMMED_REVERSE_FASTQ}" \
+"${MAPPED_TRIMMED_FASTQC_OUTPUT_DIR}" \
+${STEPS["trim_qc"]}
 
 # ==========================================================
 
@@ -108,10 +119,11 @@ MAPPED_TRINITY_ASSEMBLY_DIR=$(echo "$TRINITY_ASSEMBLY_DIR" | sed "s|$SAMPLE_DIR|
 
 ## >>> RUN: Trinity assembly
 source ${PATHS["SRC"]}/assembly.sh \
-# "${MAPPED_TRIMMED_FORWARD_FASTQ}" \
-# "${MAPPED_TRIMMED_REVERSE_FASTQ}" \
-# "${MAPPED_ASSEMBLY_OUTPUT_DIR}"   \
-# "${MAPPED_TRINITY_ASSEMBLY_DIR}"
+ "${MAPPED_TRIMMED_FORWARD_FASTQ}" \
+ "${MAPPED_TRIMMED_REVERSE_FASTQ}" \
+ "${MAPPED_ASSEMBLY_OUTPUT_DIR}"   \
+ "${MAPPED_TRINITY_ASSEMBLY_DIR}"  \
+ ${STEPS["assembly"]}
 
 TRINITY_FASTA=${PATHS["TRINITY_ASSEMBLY_FASTA"]}
 
@@ -139,14 +151,22 @@ MAPPED_BUSCO_PLOT=$(echo "$BUSCO_PLOT" | sed "s|$SAMPLE_DIR|.|")
 
 # >>> RUN: BUSCO for assembly quality control
 source ${PATHS["SRC"]}/assembly_qc_busco.sh \
-#"${MAPPED_TRINITY_FASTA}" \
-#"${MAPPED_BUSCO_OUTPUT_DIR}" \
-#"${MAPPED_BUSCO_PLOT}"
- 
-# ==========================================================
-
-source ${PATHS["SRC"]}/assembly_qc_transrate.sh
-
+"${MAPPED_TRINITY_FASTA}" \
+"${MAPPED_BUSCO_OUTPUT_DIR}" \
+"${MAPPED_BUSCO_PLOT}" \
+${STEPS["assembly_qc_busco"]}
 
 # ==========================================================
- 
+
+# >>> RUN: Transrate for assembly quality control
+source ${PATHS["SRC"]}/assembly_qc_transrate.sh ${STEPS["assembly_qc_transrate"]}
+
+# ==========================================================
+
+
+# >>> RUN: TransDecoder for coding region prediction
+source ${PATHS["SRC"]}/coding_region_prediction.sh ${STEPS["coding_region_prediction"]}
+
+
+# ==========================================================
+

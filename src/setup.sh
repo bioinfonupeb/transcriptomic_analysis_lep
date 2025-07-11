@@ -33,6 +33,7 @@ setup_analysis_structure() {
     local trinity_assembly_dir="${assembly_dir}/trinity_assembly"
     local alignment_dir="${sample_dir}/alignment"
     local quantification_dir="${sample_dir}/quantification"
+    local coding_regions="${sample_dir}/coding_regions"
 
     local qc_dir="${sample_dir}/qc"
 
@@ -43,7 +44,7 @@ setup_analysis_structure() {
     # Create directories
     mkdir -p "$sample_dir" "$raw_data_dir" "$trimmed_dir" "$alignment_dir" \
              "$trinity_assembly_dir" "$assembly_dir" "$quantification_dir" \
-             "$qc_dir" "$logs_dir" "$tmp_dir"
+             "$qc_dir" "$logs_dir" "$tmp_dir" "$coding_regions"
 
     # Set up file path variables
     # Raw data (symlink original files)
@@ -63,6 +64,7 @@ setup_analysis_structure() {
     PATHS["RAW_DATA"]="$raw_data_dir"
     PATHS["TRIMMED"]="$trimmed_dir"
     PATHS["ALIGNMENT"]="$alignment_dir"
+    PATHS["CODING_REGIONS"]="$coding_regions"
 
     PATHS["ASSEMBLY_DIR"]="$assembly_dir"
     PATHS["TRINITY_ASSEMBLY_DIR"]="$trinity_assembly_dir"
@@ -75,6 +77,8 @@ setup_analysis_structure() {
     PATHS["ASSEMBLY_QC_TRANSRATE"]="$qc_dir/qc_transrate"
     PATHS["TRANSRATE_ASSEMBLY"]="${PATHS["ASSEMBLY_QC_TRANSRATE"]}/transrate_assembly"
     PATHS["TRANSRATE_READS"]="${PATHS["ASSEMBLY_QC_TRANSRATE"]}/transrate_reads"
+
+    PATHS["TRANSDECODER"]="$coding_regions/transdecoder"
 
 
     PATHS["QUANTIFICATION"]="$quantification_dir"
@@ -121,11 +125,16 @@ setup_analysis_structure() {
     # Threads equal to number of CPU cores available minus 1
     PARAMS["THREADS"]=$(($(nproc) - 1))
 
+    SAMPLE_DIR="$sample_dir"
+    export SAMPLE_DIR
+
 
 
     echo "Created analysis structure for sample: $sample_name"
     echo "Root directory: $sample_dir"
     echo "Forward read: ${PATHS["RAW_R1"]}"
     echo "Reverse read: ${PATHS["RAW_R2"]}"
+
+
 }
 

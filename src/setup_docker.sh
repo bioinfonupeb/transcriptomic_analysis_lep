@@ -110,6 +110,6 @@ run_docker_command() {
   fi
 
   # Run the Docker command with the prefix
-#  eval "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command"
+  eval "${DOCKER_VAR["DOCKER_RUN_PREFIX"]} $image $command"
 }
 export -f run_docker_command
