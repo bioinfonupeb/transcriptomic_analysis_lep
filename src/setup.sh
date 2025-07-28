@@ -69,6 +69,7 @@ setup_analysis_structure() {
     PATHS["ASSEMBLY_DIR"]="$assembly_dir"
     PATHS["TRINITY_ASSEMBLY_DIR"]="$trinity_assembly_dir"
     PATHS["TRINITY_ASSEMBLY_FASTA"]="$assembly_dir/trinity_assembly.Trinity.fasta"
+    PATHS["TRINITY_ASSEMBLY_TRANSMAP"]="$assembly_dir/trinity_assembly.Trinity.fasta.gene_trans_map"
     PATHS["ASSEMBLY_QC_TRINITY_STATS"]="$qc_dir/trinity_assembly_stats.txt"
 
     PATHS["ASSEMBLY_QC_BUSCO"]="$qc_dir/qc_busco"

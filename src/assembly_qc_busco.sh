@@ -2,7 +2,7 @@
 
 # This script runs BUSCO on the assembly to assess its completeness.
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -lt 3 ]; then
     echo "Usage: assembly_qc_busco.sh <assembly.fasta> <busco_out> [<busco_lineage>]"
     exit 1
 fi

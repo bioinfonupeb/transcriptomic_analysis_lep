@@ -8,18 +8,28 @@ declare -A STEPS=(
     ["raw_qc"]=0
     ["trim"]=0
     ["trim_qc"]=0
-    ["assembly"]=1
+    ["assembly"]=0
     ["assembly_qc_stats"]=0
-    ["assembly_qc_salmon"]=0
-    ["assembly_qc_busco"]=0
-    ["assembly_qc_transrate"]=0
+    ["assembly_qc_salmon"]=1
+    ["assembly_qc_busco"]=1
+    ["assembly_qc_transrate"]=1
     ["coding_region_prediction"]=0
 )
 export STEPS
 
 declare -a step_order # Declare an array to define the order of steps
 export step_order
-step_order=("raw_qc" "trim" "trim_qc" "assembly" "assembly_qc_stats" "assembly_qc_salmon")
+step_order=(
+"raw_qc"
+"trim"
+"trim_qc"
+"assembly"
+"assembly_qc_stats"
+"assembly_qc_salmon"
+"assembly_qc_busco"
+"assembly_qc_transrate"
+"coding_region_prediction"
+)
 
 print_steps() {
     echo ">>> STEPS TO BE EXECUTED:"

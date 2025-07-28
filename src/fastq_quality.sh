@@ -12,8 +12,6 @@ REVERSE_FASTQ=$2
 OUTPUT_DIR=$3
 EXEC=${4:-1}  # Default to 1 if not provided (meaning execute)
 
-echo "EXEC" "$EXEC"
-
 
 # Define Docker image and container name
 DOCKER_IMAGE="biocontainers/fastqc:v0.11.9_cv8"

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 ROOT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export ROOT_PATH
-
+SETUP_FILE="${ROOT_PATH}/src/setup.sh"
 INPUT_FOLDER="${ROOT_PATH}/data/raw"
 
 # For each directory in the data directory, execute the process_data.sh script
@@ -33,7 +32,7 @@ for dir in "${INPUT_FOLDER}"/*/; do
         # Check if two fastq files were found
         if [[ -n "${FORWARD_FASTQ}" && -n "${REVERSE_FASTQ}" ]]; then
             # Execute run.sh script with the found fastq
-            RUN_CMD="./run.sh ${SAMPLE_NAME} ${FORWARD_FASTQ} ${REVERSE_FASTQ}"
+            RUN_CMD="./run.sh ${SAMPLE_NAME} ${FORWARD_FASTQ} ${REVERSE_FASTQ} ${SETUP_FILE}"
             eval "${RUN_CMD}"
 
 #            exit 1

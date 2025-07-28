@@ -8,14 +8,15 @@ if [ "$#" -ne 3 ]; then
     exit 1
 fi
 
+ROOT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export ROOT_PATH
+
 # Assign arguments to variables
 SAMPLE_NAME=$1
 FORWARD_FASTQ=$2
 REVERSE_FASTQ=$3
+SETUP_FILE=$4
 
-
-# Setup the environment and load the variables
-SETUP_FILE="${ROOT_PATH}/src/setup.sh"
 
 # Check if the config.sh file exists
 if [ -f "${SETUP_FILE}" ]; then
@@ -149,12 +150,12 @@ if [ ! -d "$BUSCO_PLOT" ]; then
 fi
 MAPPED_BUSCO_PLOT=$(echo "$BUSCO_PLOT" | sed "s|$SAMPLE_DIR|.|")
 
-# >>> RUN: BUSCO for assembly quality control
-source ${PATHS["SRC"]}/assembly_qc_busco.sh \
-"${MAPPED_TRINITY_FASTA}" \
-"${MAPPED_BUSCO_OUTPUT_DIR}" \
-"${MAPPED_BUSCO_PLOT}" \
-${STEPS["assembly_qc_busco"]}
+## >>> RUN: BUSCO for assembly quality control
+#source ${PATHS["SRC"]}/assembly_qc_busco.sh \
+#"${MAPPED_TRINITY_FASTA}" \
+#"${MAPPED_BUSCO_OUTPUT_DIR}" \
+#"${MAPPED_BUSCO_PLOT}" \
+#${STEPS["assembly_qc_busco"]}
 
 # ==========================================================
 
@@ -165,7 +166,7 @@ source ${PATHS["SRC"]}/assembly_qc_transrate.sh ${STEPS["assembly_qc_transrate"]
 
 
 # >>> RUN: TransDecoder for coding region prediction
-source ${PATHS["SRC"]}/coding_region_prediction.sh ${STEPS["coding_region_prediction"]}
+source ${PATHS["SRC"]}/coding_regions_transdecoder.sh ${STEPS["coding_region_prediction"]}
 
 
 # ==========================================================

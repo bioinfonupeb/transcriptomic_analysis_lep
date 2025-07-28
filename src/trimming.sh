@@ -38,9 +38,9 @@ DOCKER_RUN_CMD="trimmomatic PE -threads 10 -phred33 \
   LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"
 
 # Run the Docker command
-echo "$DOCKER_RUN_PREFIX" "$DOCKER_IMAGE" "$DOCKER_RUN_CMD"
 if [ "$EXEC" -eq 0 ]; then
   echo "SKIPPING command for Trimming Raw Reads with Trimmomatic."
 else
+  echo "PORRRRA"
   run_docker_command "$DOCKER_IMAGE" "$DOCKER_RUN_CMD" "Trimming with Trimmomatic."
 fi
